@@ -3,6 +3,8 @@ import os
 import inquirer
 from inquirer.themes import GreenPassion
 from pathlib import Path
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import PathCompleter
 
 # Path to the current script
 script_dir = Path(__file__).parent
@@ -27,6 +29,12 @@ inquirer_choice_type = {
     'list'      : inquirer.List,
     'checkbox'  : inquirer.Checkbox
 }
+
+def get_path(msg: str) -> str:
+    session = PromptSession()
+    completer = PathCompleter(expanduser=True, only_directories=True)
+    path = session.prompt(f"{msg}: ", completer=completer)
+    return path
 
 def get_choice(opts: list[str], msg: str, question_type: str) -> str | list[str]:
     question = [inquirer_choice_type[question_type]("choice", message=msg, choices=opts)]
@@ -70,7 +78,7 @@ def write_files(uvm_file_list: list[str], gen_name: str, write_file_dir: str) ->
         write_uvm_tmp(tmp_file, gen_name, write_file_path)
 
 if __name__ == '__main__':
-    dest_dir = get_txt('gen file dir')
+    dest_dir = get_path('gen file dir')
     gen_name = get_txt('gen file name')
     uvm_type = get_choice(uvm_types, 'select uvm component', 'list')
     uvm_file_list = get_files(uvm_type)
