@@ -16,6 +16,5 @@ function void {tmp}_sequencer::build_phase(uvm_phase phase);
 endfunction
 
 task {tmp}_sequencer::main_phase(uvm_phase phase);
-    super.main_phase(phase);
-     
+    super.main_phase(phase); 
 endtask

@@ -1,86 +1,43 @@
-import argparse
-import os
-import inquirer
-from inquirer.themes import GreenPassion
+import configparser
 from pathlib import Path
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import PathCompleter
+from uvm_comp_setting import uvm_comp_setting
 
 # Path to the current script
+cfg = configparser.ConfigParser()
+cfg.read('cfg.ini', encoding='utf-8')
+
 script_dir = Path(__file__).parent
-uvm_tmp_dir = os.path.join(script_dir, 'uvm_tmp')
 
-uvm_types = ["uvm_agent", "uvm_driver", "uvm_monitor", "uvm_sequencer", "uvm_interface"]#, "uvm_env", "uvm_sequence", "uvm_test"]
-uvm_agent_comp = ["uvm_driver", "uvm_monitor", "uvm_sequencer", "uvm_interface"]
+uvm_tree_comp_list = ["AGENT"]
 
-uvm_parent_hash = {
-    "uvm_agent" : uvm_agent_comp
-}
-
-uvm_file_hash = {
-    "uvm_agent"     : "tmp_agent.sv", 
-    "uvm_driver"    : "tmp_driver.sv", 
-    "uvm_monitor"   : "tmp_monitor.sv", 
-    "uvm_sequencer" : "tmp_sequencer.sv", 
-    "uvm_interface" : "tmp_intf.sv"
-}
-
-inquirer_choice_type = {
-    'list'      : inquirer.List,
-    'checkbox'  : inquirer.Checkbox
-}
-
-def get_path(msg: str) -> str:
-    session = PromptSession()
-    completer = PathCompleter(expanduser=True, only_directories=True)
-    path = session.prompt(f"{msg}: ", completer=completer)
+def get_path(cfg: configparser.ConfigParser) -> str:
+    path = cfg['PROJECT_SETTING']['PATH']
     return path
 
-def get_choice(opts: list[str], msg: str, question_type: str) -> str | list[str]:
-    question = [inquirer_choice_type[question_type]("choice", message=msg, choices=opts)]
-    answer = inquirer.prompt(question)
-    return answer['choice']
+def collect_uvm_comp_setting_list_by_module(cfg: configparser.ConfigParser, uvm_comp: str, proj_path: str) -> list[uvm_comp_setting]:
+    module_cnt = 0
+    uvm_comp_list = []
+    while True:
+        if not cfg.has_section(f'{uvm_comp}{module_cnt}'):
+            break
+        uvm_comp_tmp = uvm_comp_setting()
+        uvm_comp_tmp.get_setting(setting=cfg[f'{uvm_comp}{module_cnt}'], type=uvm_comp, proj_path=proj_path)
+        module_cnt += 1
+        uvm_comp_list.append(uvm_comp_tmp)
+    return uvm_comp_list
 
-def get_txt(msg: str) -> str:
-    question = [inquirer.Text("ans", message=msg)]
-    answer = inquirer.prompt(question)
-    return answer['ans']
+def collect_uvm_comp_setting_list(cfg: configparser.ConfigParser, proj_path: str) -> list[uvm_comp_setting]:
+    uvm_comp_setting_list = []
+    for uvm_tree_comp in uvm_tree_comp_list:
+        uvm_comp_setting_list += collect_uvm_comp_setting_list_by_module(cfg=cfg, uvm_comp=uvm_tree_comp, proj_path=proj_path)
+    return uvm_comp_setting_list
 
-def get_confrim(msg: str) -> bool:
-    question = [inquirer.Confirm("ans", message=msg, default = False)]
-    answer = inquirer.prompt(question)
-    return answer['ans']
-
-def get_files(uvm_type: str) -> list[str]:
-    uvm_type_list = [uvm_type]
-    if uvm_type in uvm_parent_hash:
-        msg = f'select uvm component under {uvm_type}'
-        uvm_type_list += get_choice(uvm_parent_hash[uvm_type], msg, 'checkbox')
-    uvm_file_list = [uvm_file_hash[uvm_key] for uvm_key in uvm_type_list]
-    return uvm_file_list
-
-def read_uvm_tmp(uvm_file_type: str) -> list[str]:
-    tmp_file = []
-    with open(uvm_file_type) as f:
-        for line in f:
-            tmp_file.append(line)
-    return tmp_file
-
-def write_uvm_tmp(tmp_file: list[str], gen_name: str, write_file_path: str) -> None:
-    with open(write_file_path, 'w') as f:
-        for line in tmp_file:
-            f.write(line.format(tmp = gen_name))
-
-def write_files(uvm_file_list: list[str], gen_name: str, write_file_dir: str) -> None:
-    for uvm_file in uvm_file_list:
-        tmp_file = read_uvm_tmp(os.path.join(uvm_tmp_dir, uvm_file))
-        write_file_path = os.path.join(write_file_dir, uvm_file.replace('tmp', gen_name))
-        write_uvm_tmp(tmp_file, gen_name, write_file_path)
+def create_uvm_files(uvm_comp_list: list[uvm_comp_setting]) -> None:
+    for uvm_comp in uvm_comp_list:
+        uvm_comp.create_uvm_component(script_dir)
 
 if __name__ == '__main__':
-    dest_dir = get_path('gen file dir')
-    gen_name = get_txt('gen file name')
-    uvm_type = get_choice(uvm_types, 'select uvm component', 'list')
-    uvm_file_list = get_files(uvm_type)
-    write_files(uvm_file_list, gen_name, dest_dir)
+    dest_dir = get_path(cfg)
+    uvm_comp_list = collect_uvm_comp_setting_list(cfg=cfg, proj_path=dest_dir)
+    create_uvm_files(uvm_comp_list)
 
