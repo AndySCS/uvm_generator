@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UVM_SEQUENCER name = "tmp_sequencer" >
+    <Configuration type="Global">
+        <tr>tmp_tr</tr>
+        <build_phase>True</build_phase>
+        <main_phase>True</main_phase>
+    </Configuration>
+</UVM_SEQUENCER>

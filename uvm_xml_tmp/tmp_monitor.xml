@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UVM_MONITOR name = "tmp_monitor" >
+    <Configuration type="Global">
+        <build_phase>True</build_phase>
+        <main_phase>True</main_phase>
+    </Configuration>
+    <Interface_list>
+    </Interface_list>
+    <Analysis_port_list>
+    </Analysis_port_list>
+</UVM_MONITOR>

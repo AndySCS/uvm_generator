@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UVM_ENV name = "tmp_env" >
+    <Configuration type="Global">
+        <build_phase>True</build_phase>
+        <connect_phase>False</connect_phase>
+        <main_phase>True</main_phase>
+    </Configuration>
+    <Agent_list>
+    </Agent_list>
+    <RM_list>
+    </RM_list>
+    <SC_list>
+    </SC_list>
+</UVM_ENV>
