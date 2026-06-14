@@ -4,8 +4,6 @@
         <build_phase>True</build_phase>
         <main_phase>True</main_phase>
     </Configuration>
-    <Interface_list>
-    </Interface_list>
-    <Analysis_port_list>
-    </Analysis_port_list>
+    <Interface_list></Interface_list>
+    <Analysis_port_list></Analysis_port_list>
 </UVM_MONITOR>

@@ -9,6 +9,15 @@ from xml.dom import minidom
 @dataclass
 class uvm_tree_node():
 
+    TYPE_LIST = { 
+        "UVM_ENV": "",
+        "UVM_AGENT": "Agent_list",
+        "UVM_DRIVER": "Driver_list",
+        "UVM_MONITOR": "Monitor_list",
+        #"UVM_SCOREBOARD": XML_DIR / "tmp_scoreboard.xml",
+        "UVM_SEQUENCER": "Sequencer_list"
+    }
+
     name: str
     type: str
     xml_path: str
@@ -27,8 +36,16 @@ class uvm_tree_node():
     def get_parent_xml_path(self):
         return self.parent_xml_path
     
+    def get_merge_xml_path(self):
+        merge_xml_path = f"{self.parent_xml_path}"
+        if merge_xml_path:
+            merge_list = self.TYPE_LIST.get(self.type)
+            merge_xml_path = f"{merge_xml_path}/{merge_list}"
+        return merge_xml_path
+    
     def get_node_xml_path(self):
-        node_xml_path = f"{self.type}@name={self.name}"
-        if self.parent_xml_path:
-            node_xml_path = f"{self.parent_xml_path}/{node_xml_path}"
+        node_xml_path = f"{self.type}[@name='{self.name}']"
+        merge_path = self.get_merge_xml_path()
+        if merge_path:
+            node_xml_path = f"{merge_path}/{node_xml_path}"
         return node_xml_path

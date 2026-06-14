@@ -5,12 +5,8 @@
         <connect_phase>False</connect_phase>
         <main_phase>True</main_phase>
     </Configuration>
-    <Driver_list>
-    </Driver_list>
-    <Monitor_list>
-    </Monitor_list>
-    <Sequencer_list>
-    </Sequencer_list>
-    <Analysis_port_list>
-    </Analysis_port_list>
+    <Driver_list></Driver_list>
+    <Monitor_list></Monitor_list>
+    <Sequencer_list></Sequencer_list>
+    <Analysis_port_list></Analysis_port_list>
 </UVM_AGENT>

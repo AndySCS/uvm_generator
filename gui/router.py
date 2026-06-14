@@ -56,6 +56,11 @@ class XMLGuiApp(tk.Tk):
         frame = self.frames[page_class]
         frame.tkraise()
 
+    def on_closing(self):
+        os.remove(uvm_tree.XML_TMP_DIR)  # Clean up the temporary XML file when closing the app
+        self.destroy()
+
 if __name__ == "__main__":
     app = XMLGuiApp()
+    app.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.mainloop()

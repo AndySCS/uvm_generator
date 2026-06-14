@@ -5,10 +5,7 @@
         <connect_phase>False</connect_phase>
         <main_phase>True</main_phase>
     </Configuration>
-    <Agent_list>
-    </Agent_list>
-    <RM_list>
-    </RM_list>
-    <SC_list>
-    </SC_list>
+    <Agent_list></Agent_list>
+    <RM_list></RM_list>
+    <SC_list></SC_list>
 </UVM_ENV>

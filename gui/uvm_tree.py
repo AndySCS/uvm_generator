@@ -8,13 +8,14 @@ from blocks import blocks
 from InputPopup import InputPopup
 from uvm_tree_node import uvm_tree_node
 from pathlib import Path
-from xml_parser.xml_read import xml_reader
+from xml_parser.xml_parser import xml_parser
 
 class uvm_tree(tk.Frame):
 
     #constants for tree structure
     SCRIPT_DIR = Path(__file__).resolve().parent
     XML_DIR = SCRIPT_DIR / ".." / "uvm_xml_tmp"
+    XML_TMP_DIR = SCRIPT_DIR / "xml_tmp.xml"
     UVM_XML_FILE = {
         "UVM_ENV": XML_DIR / "tmp_env.xml",
         "UVM_AGENT": XML_DIR / "tmp_agent.xml",
@@ -39,6 +40,7 @@ class uvm_tree(tk.Frame):
         self.block_menu = tk.Menu(self, tearoff=0)
         self.tree_nodes = {}  # Dictionary to keep track of nodes by their unique IDs
         self.setup_ui()
+        self.xml_tree = xml_parser(self.XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
 
     def setup_empty_menu(self):
             self.context_menu.add_command(label="Create Node", command= lambda: self.create_node())  # Placeholder for clear canvas functionality
@@ -97,6 +99,27 @@ class uvm_tree(tk.Frame):
         self.tree.bind("<Button-3>", self.show_context_menu)
         self.tree.bind('<<TreeviewSelect>>', self.on_node_click)
 
+    def insert_new_node(self, parent="", new_node=None):
+        """Helper to insert a new node into the tree."""
+        if new_node is not None:
+            node_id = self.tree.insert(parent, 'end', 
+                                       text=f"{new_node.get_name()}({new_node.get_type()})", 
+                                       values=(new_node.get_name(), new_node.get_type()))
+            self.tree_nodes[node_id] = new_node  # Store the node instance in the dictionary for later reference
+
+    def insert_xml_node(self, parent="", new_node=None):
+        tmp_xml_file_path = self.UVM_XML_FILE.get(new_node.get_type(), None)
+        if tmp_xml_file_path:
+            # Ensure the directory exists
+            tmp_xml_file_path.parent.mkdir(parents=True, exist_ok=True)
+            # Create an empty XML file for this node type
+            xml_read = xml_parser(tmp_xml_file_path)  # This will create the file if it doesn't exist and load it
+            xml_read.set_name(new_node.get_name())
+            parent_xml_path = new_node.get_merge_xml_path() if new_node.get_parent_xml_path() else "."
+            self.xml_tree.merge_xml(xml_read.root, parent_path=parent_xml_path)  # Merge the new node's XML into the main XML tree
+        else:
+            print(f"Warning: No XML file path defined for type '{new_node.get_type()}'")
+
     def create_node(self, clicked_item=""):
         """Helper to create a tree node."""
         # Create a tag so we can move both the rectangle and text together
@@ -109,20 +132,8 @@ class uvm_tree(tk.Frame):
                 type=create_result['type'], 
                 parent_xml_path=parent_xml_path
             )
-            node_id = self.tree.insert( clicked_item, 'end', 
-                                        text=f"{new_node.get_name()}({new_node.get_type()})",
-                                        values=(new_node.get_name(), new_node.get_type())
-                                    )  # Store the node instance in the values for later reference
-            self.tree_nodes[node_id] = new_node  # Store the node instance in the dictionary for later reference
-            tmp_xml_file_path = self.UVM_XML_FILE.get(create_result['type'], None)
-            if tmp_xml_file_path:
-                # Ensure the directory exists
-                tmp_xml_file_path.parent.mkdir(parents=True, exist_ok=True)
-                # Create an empty XML file for this node type
-                xml_read = xml_reader(tmp_xml_file_path)  # This will create the file if it doesn't exist and load it
-            #self.tree_nodes[new_node.get_id()] = new_node  # Store the node instance in the dictionary for later reference
-            else:
-                print(f"Warning: No XML file path defined for type '{create_result['type']}'")
+            self.insert_new_node(parent=clicked_item, new_node=new_node)
+            self.insert_xml_node(parent=clicked_item, new_node=new_node)
 
     def on_node_click(self, event):
         # 1. Get the ID of the selected item
