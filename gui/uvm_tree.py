@@ -46,7 +46,6 @@ class uvm_tree(tk.Frame):
             self.context_menu.add_command(label="Create Node", command= lambda: self.create_node())  # Placeholder for clear canvas functionality
 
     def get_clicked_node_id(self, clicked_item):
-        self.tree.selection_set(clicked_item)  # Select it
         clicked_item_id = self.tree.selection()[0]  # Get the node instance from the value
         return clicked_item_id
     
@@ -72,6 +71,7 @@ class uvm_tree(tk.Frame):
         if not clicked_item: # clicked on empty space, not a node
             self.setup_empty_menu()  # Show the "Create Node" option for empty space
         else:
+            self.tree.selection_set(clicked_item)
             self.setup_node_menu(clicked_item)  # Show the "Edit / Delete" options for the clicked node
 
     def show_context_menu(self, event):
@@ -140,17 +140,31 @@ class uvm_tree(tk.Frame):
         selected_item = self.tree.selection()
 
         if selected_item:
-            # 2. Get the unique ID (Tkinter uses strings like 'I001')
-            node_id = selected_item[0]
-            # 3. Retrieve the item's details (like its text)
-            node_text = self.tree.item(node_id, "text")
+            node_id = self.get_clicked_node_id(selected_item)
+            clicked_node = self.get_node_by_id(node_id)
+            xml_path = clicked_node.get_node_xml_path()
+            self.xml_tree.get_node_config(xml_path)
+            ## 2. Get the unique ID (Tkinter uses strings like 'I001')
+            #node_id = selected_item[0]
+            ## 3. Retrieve the item's details (like its text)
+            #node_text = self.tree.item(node_id, "text")
         
-            # Print or use the data
-            print(f"Clicked Node ID: {node_id} | Text: {node_text}")
+            ## Print or use the data
+            #print(f"Clicked Node ID: {node_id} | Text: {node_text}")
 
     def delete_node(self, item):
+        node_id = self.get_clicked_node_id(item)
+        clicked_node = self.get_node_by_id(node_id)
+
+        merge_path = clicked_node.get_merge_xml_path()
+        xml_name = clicked_node.get_xml_name()
+        self.xml_tree.del_node_by_path(merge_path = merge_path, node_name = xml_name)
+
+        self.tree_nodes.pop(node_id)
+
         self.tree.selection_clear()  # Clear selection to avoid issues with deleted item
-        self.tree.delete(item)
+        self.tree.delete(item) 
+
 
     def open_popup(self, parent_type=""):
         """Opens a popup window to collect user input for creating a new block."""
@@ -170,4 +184,3 @@ class uvm_tree(tk.Frame):
         """Helper to retrieve a node instance by its tree ID."""
         return self.tree_nodes.get(node_id, None)
     
-

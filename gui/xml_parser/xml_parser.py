@@ -45,3 +45,23 @@ class xml_parser:
 
     def set_name(self, new_name):
         self.root.set("name", new_name)
+
+    def get_node_config(self, node_path):
+        config_path = f"{node_path}/Configuration"
+        node_config = self.root.find(config_path)
+        for config in node_config:
+            print(f"{config.tag}: {config.attrib}")
+        return node_config
+    
+    def del_node_by_path(self, merge_path, node_name):
+        if merge_path:
+            del_dir = self.root.find(merge_path)
+        else:
+            del_dir = self.root
+            
+        del_node = del_dir.find(node_name)
+        if del_node:
+            del_dir.remove(del_node)
+        else:
+            print(f"path not found\npath: {merge_path}\nnode name: {node_name}")
+        self.write_xml()
