@@ -9,6 +9,7 @@ from InputPopup import InputPopup
 from uvm_tree_node import uvm_tree_node
 from pathlib import Path
 from xml_parser.xml_parser import xml_parser
+from tkinter import messagebox
 
 class uvm_tree(tk.Frame):
 
@@ -45,18 +46,21 @@ class uvm_tree(tk.Frame):
     def setup_empty_menu(self):
             self.context_menu.add_command(label="Create Node", command= lambda: self.create_node())  # Placeholder for clear canvas functionality
 
-    def get_clicked_node_id(self, clicked_item):
-        clicked_item_id = self.tree.selection()[0]  # Get the node instance from the value
+    def get_clicked_node_id(self):
+        clicked_item_id = ""
+        clicked_item = self.tree.selection()
+        if clicked_item:
+            clicked_item_id = clicked_item[0]  # Get the node instance from the value
         return clicked_item_id
     
-    def get_clicked_node_type(self, clicked_item):
-        clicked_item_id = self.get_clicked_node_id(clicked_item)
+    def get_clicked_node_type(self):
+        clicked_item_id = self.get_clicked_node_id()
         clicked_node = self.get_node_by_id(clicked_item_id)
         return clicked_node.get_type()  # Add a tag for styling if needed
 
     def setup_node_menu(self, clicked_item):
         # User clicked on an actual node
-        item_type = self.get_clicked_node_type(clicked_item)
+        item_type = self.get_clicked_node_type()
         if self.UVM_TREE_NODES_NXT.get(item_type, []):  # Check if there are allowed child types
             self.context_menu.add_command(label="Create Block", command= lambda: self.create_node(clicked_item=clicked_item))  # Placeholder for clear canvas functionality
         self.context_menu.add_command(label="Delete Node", command= lambda: self.delete_node(item=clicked_item))  # Placeholder for clear canvas functionality
@@ -120,12 +124,28 @@ class uvm_tree(tk.Frame):
         else:
             print(f"Warning: No XML file path defined for type '{new_node.get_type()}'")
 
+    def check_duplicate_name_exist(self, parent_id, new_node_name):
+        children_nodes = self.tree.get_children(parent_id)
+        children_node_name = [self.get_node_by_id(children_node).get_name() for children_node in children_nodes]
+        if new_node_name in children_node_name:
+            return True
+        else:
+            return False
+
     def create_node(self, clicked_item=""):
         """Helper to create a tree node."""
         # Create a tag so we can move both the rectangle and text together
-        parent_type = self.get_clicked_node_type(clicked_item) if clicked_item else ""
-        create_result = self.open_popup(parent_type=parent_type)
-        if create_result is not None:
+        parent_type = self.get_clicked_node_type() if clicked_item else ""
+        parent_id = self.get_clicked_node_id()
+        while True:
+            create_result = self.open_popup(parent_type=parent_type)
+
+            if create_result is None:
+                break
+            if self.check_duplicate_name_exist(parent_id=parent_id, new_node_name=create_result['name']):
+                messagebox.showwarning("Warning Alert", f"new {create_result['type']} name {create_result['name']} duplicated")
+                continue
+
             parent_xml_path = self.get_node_by_id(clicked_item).get_node_xml_path() if clicked_item else ""
             new_node = uvm_tree_node(
                 name=create_result['name'], 
@@ -134,26 +154,20 @@ class uvm_tree(tk.Frame):
             )
             self.insert_new_node(parent=clicked_item, new_node=new_node)
             self.insert_xml_node(parent=clicked_item, new_node=new_node)
-
+            break 
+        
     def on_node_click(self, event):
         # 1. Get the ID of the selected item
         selected_item = self.tree.selection()
 
         if selected_item:
-            node_id = self.get_clicked_node_id(selected_item)
+            node_id = self.get_clicked_node_id()
             clicked_node = self.get_node_by_id(node_id)
             xml_path = clicked_node.get_node_xml_path()
             self.xml_tree.get_node_config(xml_path)
-            ## 2. Get the unique ID (Tkinter uses strings like 'I001')
-            #node_id = selected_item[0]
-            ## 3. Retrieve the item's details (like its text)
-            #node_text = self.tree.item(node_id, "text")
-        
-            ## Print or use the data
-            #print(f"Clicked Node ID: {node_id} | Text: {node_text}")
 
     def delete_node(self, item):
-        node_id = self.get_clicked_node_id(item)
+        node_id = self.get_clicked_node_id()
         clicked_node = self.get_node_by_id(node_id)
 
         merge_path = clicked_node.get_merge_xml_path()
@@ -165,19 +179,17 @@ class uvm_tree(tk.Frame):
         self.tree.selection_clear()  # Clear selection to avoid issues with deleted item
         self.tree.delete(item) 
 
-
     def open_popup(self, parent_type=""):
         """Opens a popup window to collect user input for creating a new block."""
-        popup = InputPopup(self, types=list(self.UVM_TREE_NODES_NXT.get(parent_type, [])))  # Pass the allowed types based on parent
+        popup_type = list(self.UVM_TREE_NODES_NXT.get(parent_type, []))
+        popup = InputPopup(self, types=popup_type)  # Pass the allowed types based on parent
         self.wait_window(popup)  # Wait until the popup is closed
         
         # Check if the user filled it out or just closed it
         if popup.result:
             data = popup.result
             # Display the collected data in our main window label
-            print(
-                f"Data Received:\nName: {data['name']}\nType: {data['type']}"
-            )
+            print(f"Data Received:\nName: {data['name']}\nType: {data['type']}")
         return popup.result
     
     def get_node_by_id(self, node_id):
