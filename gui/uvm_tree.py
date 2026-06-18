@@ -10,6 +10,7 @@ from uvm_tree_node import uvm_tree_node
 from pathlib import Path
 from xml_parser.xml_parser import xml_parser
 from tkinter import messagebox
+from tree_node_editor import tree_node_editor
 
 class uvm_tree(tk.Frame):
 
@@ -41,7 +42,8 @@ class uvm_tree(tk.Frame):
         self.block_menu = tk.Menu(self, tearoff=0)
         self.tree_nodes = {}  # Dictionary to keep track of nodes by their unique IDs
         self.setup_ui()
-        self.xml_tree = xml_parser(self.XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
+        #self.xml_tree = xml_parser(self.XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
+        self.xml_tree = self.controller.xml_tree
 
     def setup_empty_menu(self):
             self.context_menu.add_command(label="Create Node", command= lambda: self.create_node())  # Placeholder for clear canvas functionality
@@ -165,6 +167,7 @@ class uvm_tree(tk.Frame):
             clicked_node = self.get_node_by_id(node_id)
             xml_path = clicked_node.get_node_xml_path()
             self.xml_tree.get_node_config(xml_path)
+            self.controller.frames[tree_node_editor].setup_menu(clicked_node)
 
     def delete_node(self, item):
         node_id = self.get_clicked_node_id()
