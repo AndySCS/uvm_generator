@@ -87,8 +87,7 @@ class xml_parser:
             return config_dict
         else:
             raise ValueError("Config does not specify datatype")  # Triggers an error immediately
-        
-    
+         
     def del_node_by_path(self, merge_path, node_name):
         if merge_path:
             del_dir = self.root.find(merge_path)
@@ -101,3 +100,18 @@ class xml_parser:
         else:
             print(f"path not found\npath: {merge_path}\nnode name: {node_name}")
         self.write_xml()
+
+    def update_node_config(self, node_path: str, new_config: dict)->None:
+        config_path = f"{node_path}/Configuration"
+        node_config = self.root.find(config_path)
+        for new_config_tag, new_config_value in new_config.items():
+            #print(config_tag)
+            update_config = node_config.find(new_config_tag)
+
+            if update_config is None:
+                raise ValueError(f"config {new_config_tag} does not exits in path:\n{node_path}")
+            
+            update_config.text = str(new_config_value).lower()
+
+        self.write_xml()
+

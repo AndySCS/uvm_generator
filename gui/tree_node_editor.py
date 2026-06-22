@@ -78,8 +78,13 @@ class tree_node_editor(tk.Frame):
             self.grid_columnconfigure(0, weight=1)
 
             # 4. Place the button at the very next row below the checkboxes
-            btn = tk.Button(self, text='Enter')  
+            btn = tk.Button(self, text='Update node', command= self.update_node)  
             btn.grid(row=idx + 1, column=1, sticky="se", padx=10, pady=10)
+
+    def update_node(self):
+        node_xml_path = self.uvm_tree_node.get_node_xml_path()
+        deocde_variables = {key: value.get() for key, value in self.variables.items()} #extract data from tk variables
+        self.controller.xml_tree.update_node_config(node_path = node_xml_path, new_config =deocde_variables)
 
     def reset_menu(self):
         for widget in self.winfo_children():
