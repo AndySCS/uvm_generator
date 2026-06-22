@@ -15,21 +15,73 @@ class tree_node_editor(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.xml_tree = self.controller.xml_tree
+        self.setup_ui()
+
+    def setup_ui(self):
+        pass
+
+    def check_config_vld(self, config):
+        config_value = config.get('value', None)
+        config_tag = config.get('tag', None)
+        config_type = config.get('type', None)
+
+        if config_value is None or config_tag is None or config_type is None:
+            raise ValueError("value or tag is not found in config")
+        
+        return config_tag, config_type, config_value
+
+    def setup_checkbox(self, idx, config_value, config_tag):
+        # 1. Create a tracking variable for this specific checkbox
+        var = tk.BooleanVar(value=config_value)
+        self.variables[config_tag] = var
+
+        # 2. Create the Checkbutton widget
+        # We use grid layout to stack them neatly on top of each other
+        cb = ttk.Checkbutton(self, text=f"{config_tag}", variable=var)
+        cb.grid(row=idx, column=0, sticky="w", pady=2)
+
+    def setup_textbox(self, idx, config_value, config_tag):
+        entry_var = tk.StringVar(value = config_value)
+        self.variables[config_tag] = entry_var
+
+        entry_frame = tk.Frame(self)
+        entry_frame.grid(row=idx, column=0, columnspan=2, sticky="w", pady=2)
+
+        config_label = tk.Label(entry_frame, text=config_tag)
+        config_label.pack(side="left")
+
+        self.answer_entry = tk.Entry(entry_frame, textvariable=entry_var)
+        self.answer_entry.pack(side="left", padx=(5, 0))
+        #self.answer_entry.insert(0, config_value)
 
     def setup_menu(self, uvm_tree_node):
         self.uvm_tree_node = uvm_tree_node
         self.variables = {}
+        self.reset_menu()
+
         if self.uvm_tree_node:
             tree_node_path = self.uvm_tree_node.get_node_xml_path()
             configs = self.xml_tree.get_node_config(tree_node_path)
-            for idx, config in enumerate(configs):
-                # 1. Create a tracking variable for this specific checkbox
-                var = tk.BooleanVar(value=False)
-                self.variables[config] = var
-
-                # 2. Create the Checkbutton widget
-                # We use grid layout to stack them neatly on top of each other
-                cb = ttk.Checkbutton(self, text=f"{config.tag}", variable=var)
-                cb.grid(row=idx, column=0, sticky="w", pady=2)
+            idx = 0
     
+            for config in configs:
+                config_tag, confgi_type, config_value = self.check_config_vld(config=config)
+                if confgi_type == 'bool':
+                    self.setup_checkbox(idx=idx, config_value=config_value, config_tag=config_tag)
+                else:
+                    self.setup_textbox(idx=idx, config_value=config_value, config_tag=config_tag)
+                idx += 1
+
+            # 3. Configure the row/column weights so sticky="se" actually moves it to the corner
+            self.grid_rowconfigure(idx + 1, weight=1)
+            self.grid_columnconfigure(0, weight=1)
+            self.grid_columnconfigure(0, weight=1)
+
+            # 4. Place the button at the very next row below the checkboxes
+            btn = tk.Button(self, text='Enter')  
+            btn.grid(row=idx + 1, column=1, sticky="se", padx=10, pady=10)
+
+    def reset_menu(self):
+        for widget in self.winfo_children():
+            widget.destroy() 
     

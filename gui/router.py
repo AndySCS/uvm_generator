@@ -29,10 +29,13 @@ class XMLGuiApp(tk.Tk):
         # Configure the app window to use this menu object
         self.config(menu=self.main_menu)
         self.xml_tree = xml_parser(self.XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
         # Create a central container to hold all page frames
         tree_container = tk.Frame(self)
-        tree_container.pack(side="left", fill="both", expand=True)
+        tree_container.grid(row=0, column=0, sticky="nsew")
         
         # Configure the grid to expand equally
         tree_container.grid_rowconfigure(0, weight=1)
@@ -40,7 +43,7 @@ class XMLGuiApp(tk.Tk):
 
         # Create a central container to hold all page frames
         config_container = tk.Frame(self)
-        config_container.pack(side="left", fill="both", expand=True)
+        config_container.grid(row=0, column=1, sticky="nsew")
         
         # Configure the grid to expand equally
         config_container.grid_rowconfigure(0, weight=1)

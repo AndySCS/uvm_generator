@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_INTERFACE name = "tmp_interface" >
+<UVM_INTERFACE name = "tmp_interface" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <Configuration type="Global">
     </Configuration>
 </UVM_INTERFACE>

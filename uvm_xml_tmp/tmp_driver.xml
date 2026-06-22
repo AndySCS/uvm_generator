@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_DRIVER name = "tmp_driver" >
+<UVM_DRIVER name = "tmp_driver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
     <Configuration type="Global">
-        <tr>tmp_tr</tr>
-        <build_phase>True</build_phase>
-        <main_phase>True</main_phase>
+        <tr xsi:type="xsd:string">tmp_tr</tr>
+        <build_phase xsi:type="xsd:boolean">true</build_phase>
+        <main_phase xsi:type="xsd:boolean">true</main_phase>
     </Configuration>
     <Interface_list></Interface_list>
 </UVM_DRIVER>

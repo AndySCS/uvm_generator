@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_AGENT name = "tmp_agent" >
+<UVM_AGENT name = "tmp_agent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <Configuration type="Global">
-        <build_phase>True</build_phase>
-        <connect_phase>False</connect_phase>
-        <main_phase>True</main_phase>
+        <build_phase xsi:type="xsd:boolean">true</build_phase>
+        <connect_phase xsi:type="xsd:boolean">false</connect_phase>
+        <main_phase xsi:type="xsd:boolean">true</main_phase>
     </Configuration>
     <Driver_list></Driver_list>
     <Monitor_list></Monitor_list>

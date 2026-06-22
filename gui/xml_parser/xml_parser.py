@@ -2,6 +2,14 @@ from logging import root
 import xml.etree.ElementTree as ET
 
 class xml_parser:
+
+    namespaces = {
+    'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+    }
+
+    # Construct the exact attribute key Python will see
+    xsi_type_key = f"{{{namespaces['xsi']}}}type"
+
     def __init__(self, file_path, create_if_not_exists=False):
         self.file_path = file_path
         # 1. Load and parse the XML file
@@ -48,10 +56,38 @@ class xml_parser:
 
     def get_node_config(self, node_path):
         config_path = f"{node_path}/Configuration"
-        node_config = self.root.find(config_path)
-        for config in node_config:
-            print(f"{config.tag}: {config.attrib}")
-        return node_config
+        node_config_raw = self.root.find(config_path)
+        config_list = []
+        for config in node_config_raw:
+            config_list.append(self.get_node_config_value(config))
+        return config_list
+    
+    def get_node_config_value(self, config):
+        node_value = config.text.strip()
+        actual_type = ""
+        if self.xsi_type_key in config.attrib:
+            data_type = config.attrib[self.xsi_type_key]
+            # Cast to Python boolean if the type is xsd:boolean
+
+            if data_type == "xsd:boolean":
+                # XML booleans are standard lowercase 'true' or 'false'
+                actual_value = node_value.lower() == "true"
+                actual_type = "bool"
+            else:
+                # Fallback for other types or default strings
+                actual_value = node_value
+                actual_type = "string"
+
+            config_dict = {
+                'tag': config.tag,
+                'type': actual_type,
+                'value': actual_value
+            }
+
+            return config_dict
+        else:
+            raise ValueError("Config does not specify datatype")  # Triggers an error immediately
+        
     
     def del_node_by_path(self, merge_path, node_name):
         if merge_path:
