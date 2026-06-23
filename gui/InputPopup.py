@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from sys_consts import uvm_gen_config_table
 
 class InputPopup(tk.Toplevel):
     def __init__(self, parent, types):
@@ -34,18 +35,35 @@ class InputPopup(tk.Toplevel):
 
     def submit(self):
         name = self.entry_name.get().strip()
-        priority = self.combo_priority.get()
+        type = self.combo_priority.get()
         
         # --- Data Validation ---
         if not name:
             messagebox.showwarning("Validation Error", "Name cannot be empty!", parent=self)
             return
+        
+        name_vld = self.check_format_name(name, type)
+        if not name_vld:
+            #messagebox.showwarning("Validation Error", "Name cannot be empty!", parent=self)
+            return
 
         # Save results into a dictionary if validation passes
         self.result = {
             "name": name,
-            "type": priority
+            "type": type
         }
         
         # Close the popup
         self.destroy()
+
+    def check_format_name(self, name: str, type: str) -> bool:
+        correct_suffix = uvm_gen_config_table.get(type).NAME_SUFFIX
+        if not name.endswith(correct_suffix):
+            msg = (f"{name} with type {type} does not end with expected suffix({correct_suffix})\n"
+                   "Do you want to continue with current name?")
+            response = messagebox.askyesno("Warning", msg)
+            if response:
+                return True
+            else:
+                return False
+        return True

@@ -11,29 +11,9 @@ from pathlib import Path
 from xml_parser.xml_parser import xml_parser
 from tkinter import messagebox
 from tree_node_editor import tree_node_editor
+from sys_consts import uvm_gen_config_table
 
 class uvm_tree(tk.Frame):
-
-    #constants for tree structure
-    SCRIPT_DIR = Path(__file__).resolve().parent
-    XML_DIR = SCRIPT_DIR / ".." / "uvm_xml_tmp"
-    XML_TMP_DIR = SCRIPT_DIR / "xml_tmp.xml"
-    UVM_XML_FILE = {
-        "UVM_ENV": XML_DIR / "tmp_env.xml",
-        "UVM_AGENT": XML_DIR / "tmp_agent.xml",
-        "UVM_DRIVER": XML_DIR / "tmp_driver.xml",
-        "UVM_MONITOR": XML_DIR / "tmp_monitor.xml",
-        #"UVM_SCOREBOARD": XML_DIR / "tmp_scoreboard.xml",
-        "UVM_SEQUENCER": XML_DIR / "tmp_sequencer.xml"
-    }
-    UVM_TREE_NODES_NXT = {
-        "":["UVM_ENV"],
-        "UVM_ENV":["UVM_AGENT", "UVM_DRIVER", "UVM_MONITOR"],
-        "UVM_AGENT":["UVM_DRIVER", "UVM_MONITOR", "UVM_SEQUENCER"],
-        "UVM_DRIVER":[],
-        "UVM_MONITOR":[],
-        "UVM_SCOREBOARD":[]
-    }
 
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -63,7 +43,7 @@ class uvm_tree(tk.Frame):
     def setup_node_menu(self, clicked_item):
         # User clicked on an actual node
         item_type = self.get_clicked_node_type()
-        if self.UVM_TREE_NODES_NXT.get(item_type, []):  # Check if there are allowed child types
+        if uvm_gen_config_table.get(item_type).UVM_TREE_NODES_NXT:  # Check if there are allowed child types
             self.context_menu.add_command(label="Create Block", command= lambda: self.create_node(clicked_item=clicked_item))  # Placeholder for clear canvas functionality
         self.context_menu.add_command(label="Delete Node", command= lambda: self.delete_node(item=clicked_item))  # Placeholder for clear canvas functionality
         # Show your "Edit / Delete" context menu here
@@ -114,7 +94,8 @@ class uvm_tree(tk.Frame):
             self.tree_nodes[node_id] = new_node  # Store the node instance in the dictionary for later reference
 
     def insert_xml_node(self, parent="", new_node=None):
-        tmp_xml_file_path = self.UVM_XML_FILE.get(new_node.get_type(), None)
+        node_type = new_node.get_type()
+        tmp_xml_file_path = uvm_gen_config_table.get(node_type).UVM_XML_FILE
         if tmp_xml_file_path:
             # Ensure the directory exists
             tmp_xml_file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -184,7 +165,7 @@ class uvm_tree(tk.Frame):
 
     def open_popup(self, parent_type=""):
         """Opens a popup window to collect user input for creating a new block."""
-        popup_type = list(self.UVM_TREE_NODES_NXT.get(parent_type, []))
+        popup_type = list(uvm_gen_config_table.get(parent_type).UVM_TREE_NODES_NXT)
         popup = InputPopup(self, types=popup_type)  # Pass the allowed types based on parent
         self.wait_window(popup)  # Wait until the popup is closed
         

@@ -10,12 +10,10 @@ from toolbar import toolbar
 from tree_node_editor import tree_node_editor
 from xml_parser.xml_parser import xml_parser
 from pathlib import Path
+from sys_consts import XML_TMP_DIR
 
 
 class XMLGuiApp(tk.Tk):
-    SCRIPT_DIR = Path(__file__).resolve().parent
-    XML_DIR = SCRIPT_DIR / ".." / "uvm_xml_tmp"
-    XML_TMP_DIR = SCRIPT_DIR / "xml_tmp.xml"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,7 +26,7 @@ class XMLGuiApp(tk.Tk):
         
         # Configure the app window to use this menu object
         self.config(menu=self.main_menu)
-        self.xml_tree = xml_parser(self.XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
+        self.xml_tree = xml_parser(XML_TMP_DIR, create_if_not_exists=True)  # Load or create the XML file for the root node
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -70,7 +68,7 @@ class XMLGuiApp(tk.Tk):
         frame.tkraise()
 
     def on_closing(self):
-        os.remove(uvm_tree.XML_TMP_DIR)  # Clean up the temporary XML file when closing the app
+        os.remove(XML_TMP_DIR)  # Clean up the temporary XML file when closing the app
         self.destroy()
 
 if __name__ == "__main__":
