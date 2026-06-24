@@ -89,7 +89,7 @@ class uvm_tree(tk.Frame):
         """Helper to insert a new node into the tree."""
         if new_node is not None:
             node_id = self.tree.insert(parent, 'end', 
-                                       text=f"{new_node.get_name()}({new_node.get_type()})", 
+                                       text=f"{new_node.get_name()} ({new_node.get_type()})", 
                                        values=(new_node.get_name(), new_node.get_type()))
             self.tree_nodes[node_id] = new_node  # Store the node instance in the dictionary for later reference
 
@@ -166,7 +166,9 @@ class uvm_tree(tk.Frame):
     def open_popup(self, parent_type=""):
         """Opens a popup window to collect user input for creating a new block."""
         popup_type = list(uvm_gen_config_table.get(parent_type).UVM_TREE_NODES_NXT)
-        popup = InputPopup(self, types=popup_type)  # Pass the allowed types based on parent
+        print(popup_type)
+        popup_list = [f"{type} ({uvm_gen_config_table.get(type).NAME_SUFFIX})" for type in popup_type]
+        popup = InputPopup(self, types=popup_list)  # Pass the allowed types based on parent
         self.wait_window(popup)  # Wait until the popup is closed
         
         # Check if the user filled it out or just closed it
