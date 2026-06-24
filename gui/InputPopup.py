@@ -35,7 +35,8 @@ class InputPopup(tk.Toplevel):
 
     def submit(self):
         name = self.entry_name.get().strip()
-        type = self.combo_priority.get()
+        type = self.combo_priority.get().split(' ')[0]
+        print(f"{type}1")
         
         # --- Data Validation ---
         if not name:
