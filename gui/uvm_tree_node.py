@@ -34,7 +34,7 @@ class uvm_tree_node():
     
     def get_merge_xml_path(self):
         merge_xml_path = f"{self.parent_xml_path}"
-        if merge_xml_path:
+        if merge_xml_path != '.':
             merge_list = uvm_gen_config_table.get(self.type).TYPE_LIST
             merge_xml_path = f"{merge_xml_path}/{merge_list}"
         return merge_xml_path
