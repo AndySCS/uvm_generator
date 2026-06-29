@@ -4,13 +4,13 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from start_page import start_page
 from uvm_tree import uvm_tree
 from toolbar import toolbar
 from tree_node_editor import tree_node_editor
 from xml_parser.xml_parser import xml_parser
 from pathlib import Path
 from sys_consts import XML_TMP_DIR
+from sys_consts import SCRIPT_DIR
 
 
 class XMLGuiApp(tk.Tk):
@@ -19,6 +19,7 @@ class XMLGuiApp(tk.Tk):
         super().__init__(*args, **kwargs)
         self.title("XML Creator & Reader")
         self.geometry("600x500")
+        self.gen_dir = SCRIPT_DIR
         #self.root.minsize(500, 400)
         
         # Instantiate the separated Menu class and pass 'self' (this app) into it

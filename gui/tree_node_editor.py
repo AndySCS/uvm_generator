@@ -4,10 +4,11 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from blocks import blocks
 from InputPopup import InputPopup
 from uvm_tree_node import uvm_tree_node
 from xml_parser.xml_parser import xml_parser
+from tkinter import filedialog
+from pathlib import Path
 
 class tree_node_editor(tk.Frame):
 
@@ -16,6 +17,11 @@ class tree_node_editor(tk.Frame):
         self.controller = controller
         self.xml_tree = self.controller.xml_tree
         self.setup_ui()
+        self.setup_config_by_type = {
+            'string': self.setup_textbox,
+            'boolean': self.setup_checkbox,
+            'dir': self.setup_path
+        }
 
     def setup_ui(self):
         pass
@@ -50,8 +56,40 @@ class tree_node_editor(tk.Frame):
         config_label = tk.Label(entry_frame, text=config_tag)
         config_label.pack(side="left")
 
-        self.answer_entry = tk.Entry(entry_frame, textvariable=entry_var)
-        self.answer_entry.pack(side="left", padx=(5, 0))
+        answer_entry = tk.Entry(entry_frame, textvariable=entry_var)
+        answer_entry.pack(side="left", padx=(5, 0))
+        #self.answer_entry.insert(0, config_value)
+
+    def setup_path(self, idx, config_value, config_tag):
+        
+        def get_path(entry_var):
+            if entry_var.get():
+                initialdir = entry_var.get()
+            else:
+                initialdir=Path.cwd() 
+            selected_dir = filedialog.askdirectory(
+                initialdir=initialdir, 
+                title="Select a Directory"
+            )
+            if selected_dir:
+                # StringVar CAN update even if the Entry widget is disabled!
+                entry_var.set(selected_dir)
+
+        entry_var = tk.StringVar(value = config_value)
+        self.variables[config_tag] = entry_var
+
+        entry_frame = tk.Frame(self)
+        entry_frame.grid(row=idx, column=0, columnspan=2, sticky="w", pady=2)
+
+        config_label = tk.Label(entry_frame, text=config_tag)
+        config_label.pack(side="left")
+
+        answer_entry = tk.Entry(entry_frame, textvariable=entry_var)
+        answer_entry.pack(side="left", padx=(5, 0))
+        answer_entry.config(state="disabled")
+
+        btn_open = tk.Button(entry_frame, text="Browse Folder", command=lambda: get_path(entry_var=entry_var))
+        btn_open.pack(side="left", padx=(5, 0))
         #self.answer_entry.insert(0, config_value)
 
     def setup_menu(self, uvm_tree_node):
@@ -66,10 +104,7 @@ class tree_node_editor(tk.Frame):
     
             for config in configs:
                 config_tag, confgi_type, config_value = self.check_config_vld(config=config)
-                if confgi_type == 'bool':
-                    self.setup_checkbox(idx=idx, config_value=config_value, config_tag=config_tag)
-                else:
-                    self.setup_textbox(idx=idx, config_value=config_value, config_tag=config_tag)
+                self.setup_config_by_type[confgi_type](idx=idx, config_value=config_value, config_tag=config_tag)
                 idx += 1
 
             # 3. Configure the row/column weights so sticky="se" actually moves it to the corner

@@ -8,7 +8,6 @@ class xml_parser:
     }
 
     # Construct the exact attribute key Python will see
-    xsi_type_key = f"{{{namespaces['xsi']}}}type"
 
     def __init__(self, file_path, create_if_not_exists=False):
         self.file_path = file_path
@@ -38,14 +37,44 @@ class xml_parser:
         except Exception as e:
             print(f"Error loading XML file: {e}")
 
-    def merge_xml(self, new_root: ET.Element, parent_path="."):
-        target_parent = self.root.find(parent_path)
+    def merge_xml(self, new_root: ET.Element, parent_path=".", type_list=""):
+        
+        merge_path = "."
+
+        if parent_path != ".":
+            merge_path = f"{parent_path}/{type_list}"
+        target_parent = self.root.find(merge_path)
+
         if target_parent is not None:
+            
+            parent_dir = self.get_gen_dir(parent_path)
+            new_root_config = new_root.find('Configuration')
+
+            if new_root_config:
+                new_root_dir = new_root_config.find('dir')
+
+                if new_root_dir is not None:
+                    print(parent_dir)
+                    new_root_dir.text = str(parent_dir)
+
             target_parent.append(new_root)
             print("XML merged successfully!")
             self.write_xml()
         else:
-            print(f"Parent node not found, parent path is {parent_path}")
+            print(f"Parent node not found, parent path is {merge_path}")
+
+    def get_gen_dir(self, node_path: str = "."):
+        config_path = f"{node_path}/Configuration"
+        node_config_raw = self.root.find(config_path)
+        if node_config_raw:
+            gen_dir = node_config_raw.find('dir')
+            print("gen dir")
+            for child in node_config_raw:
+                print(f"Tag: {child.tag} | Attributes: {child.attrib} | Text: {child.text}")
+            print("gen dir ends")
+            return gen_dir.text if gen_dir.text else ""
+        else:
+            return ""
 
     def write_xml(self):
         ET.indent(self.tree, space="    ", level=0)
@@ -57,36 +86,32 @@ class xml_parser:
     def get_node_config(self, node_path):
         config_path = f"{node_path}/Configuration"
         node_config_raw = self.root.find(config_path)
+        if not node_config_raw:
+            raise ValueError(f"Configuration path {config_path} does not exist")
         config_list = []
         for config in node_config_raw:
             config_list.append(self.get_node_config_value(config))
         return config_list
     
     def get_node_config_value(self, config):
-        node_value = config.text.strip()
-        actual_type = ""
-        if self.xsi_type_key in config.attrib:
-            data_type = config.attrib[self.xsi_type_key]
-            # Cast to Python boolean if the type is xsd:boolean
+        node_value = config.text.strip() if config.text else ""
+        data_type = config.attrib['type']
+        # Cast to Python boolean if the type is xsd:boolean
 
-            if data_type == "xsd:boolean":
-                # XML booleans are standard lowercase 'true' or 'false'
-                actual_value = node_value.lower() == "true"
-                actual_type = "bool"
-            else:
-                # Fallback for other types or default strings
-                actual_value = node_value
-                actual_type = "string"
-
-            config_dict = {
-                'tag': config.tag,
-                'type': actual_type,
-                'value': actual_value
-            }
-
-            return config_dict
+        if data_type == "boolean":
+            # XML booleans are standard lowercase 'true' or 'false'
+            actual_value = node_value.lower() == "true"
         else:
-            raise ValueError("Config does not specify datatype")  # Triggers an error immediately
+            # Fallback for other types or default strings
+            actual_value = node_value
+
+        config_dict = {
+            'tag': config.tag,
+            'type': data_type,
+            'value': actual_value
+        }
+
+        return config_dict
          
     def del_node_by_path(self, merge_path, node_name):
         if merge_path:
@@ -111,7 +136,7 @@ class xml_parser:
             if update_config is None:
                 raise ValueError(f"config {new_config_tag} does not exits in path:\n{node_path}")
             
-            update_config.text = str(new_config_value).lower()
+            update_config.text = str(new_config_value)
 
         self.write_xml()
 

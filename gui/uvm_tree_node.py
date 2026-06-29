@@ -13,8 +13,9 @@ class uvm_tree_node():
     name: str
     type: str
     xml_path: str
+    gen_path: str
     
-    def __init__(self, name, type, parent_xml_path):
+    def __init__(self, name = "", type = "", parent_xml_path = ""):
         self.name = name
         self.type = type
         self.parent_xml_path = parent_xml_path
@@ -26,7 +27,10 @@ class uvm_tree_node():
         return self.type
 
     def get_parent_xml_path(self):
-        return self.parent_xml_path
+        return self.parent_xml_path 
+    
+    def get_type_list(self):
+        return uvm_gen_config_table.get(self.type).TYPE_LIST
     
     def get_merge_xml_path(self):
         merge_xml_path = f"{self.parent_xml_path}"

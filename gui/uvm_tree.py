@@ -101,8 +101,9 @@ class uvm_tree(tk.Frame):
             # Create an empty XML file for this node type
             xml_read = xml_parser(tmp_xml_file_path)  # This will create the file if it doesn't exist and load it
             xml_read.set_name(new_node.get_name())
-            parent_xml_path = new_node.get_merge_xml_path() if new_node.get_parent_xml_path() else "."
-            self.xml_tree.merge_xml(xml_read.root, parent_path=parent_xml_path)  # Merge the new node's XML into the main XML tree
+            parent_xml_path = new_node.get_parent_xml_path()
+            type_list = new_node.get_type_list()    
+            self.xml_tree.merge_xml(new_root=xml_read.root, parent_path=parent_xml_path, type_list=type_list)  # Merge the new node's XML into the main XML tree
         else:
             print(f"Warning: No XML file path defined for type '{new_node.get_type()}'")
 
@@ -128,7 +129,7 @@ class uvm_tree(tk.Frame):
                 messagebox.showwarning("Warning Alert", f"new {create_result['type']} name {create_result['name']} duplicated")
                 continue
 
-            parent_xml_path = self.get_node_by_id(clicked_item).get_node_xml_path() if clicked_item else ""
+            parent_xml_path = self.get_node_by_id(clicked_item).get_node_xml_path() if clicked_item else "."
             new_node = uvm_tree_node(
                 name=create_result['name'], 
                 type=create_result['type'], 
