@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_SEQUENCER name = "tmp_sequencer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<UVM_SEQUENCER name = "tmp_sequencer">
     <Configuration type="Global">
-        <tr xsi:type="xsd:string">tmp_tr</tr>
-        <build_phase xsi:type="xsd:boolean">true</build_phase>
-        <main_phase xsi:type="xsd:boolean">true</main_phase>
+        <tr type="string">tmp_tr</tr>
+        <dir type="dir"></dir>
+        <build_phase type="boolean">true</build_phase>
+        <main_phase type="boolean">true</main_phase>
     </Configuration>
 </UVM_SEQUENCER>

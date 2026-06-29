@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_MONITOR name = "tmp_monitor" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<UVM_MONITOR name = "tmp_monitor">
     <Configuration type="Global">
-        <build_phase xsi:type="xsd:boolean">true</build_phase>
-        <main_phase xsi:type="xsd:boolean">true</main_phase>
+        <dir type="dir"></dir>
+        <build_phase type="boolean">true</build_phase>
+        <main_phase type="boolean">true</main_phase>
     </Configuration>
     <Interface_list></Interface_list>
     <Analysis_port_list></Analysis_port_list>

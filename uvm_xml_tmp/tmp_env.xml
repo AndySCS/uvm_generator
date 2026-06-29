@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UVM_ENV name = "tmp_env" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<UVM_ENV name = "tmp_env">
     <Configuration type="Global">
-        <build_phase xsi:type="xsd:boolean">true</build_phase>
-        <connect_phase xsi:type="xsd:boolean">false</connect_phase>
-        <main_phase xsi:type="xsd:boolean">true</main_phase>
+        <dir type="dir"></dir>
+        <build_phase type="boolean">true</build_phase>
+        <connect_phase type="boolean">false</connect_phase>
+        <main_phase type="boolean">true</main_phase>
     </Configuration>
     <Agent_list></Agent_list>
     <RM_list></RM_list>

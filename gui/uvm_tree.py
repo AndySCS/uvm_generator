@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from blocks import blocks
 from InputPopup import InputPopup
 from uvm_tree_node import uvm_tree_node
 from pathlib import Path
